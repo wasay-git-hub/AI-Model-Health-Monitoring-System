@@ -11,3 +11,6 @@ sys
 pyYAML
 pytest
 scipy
+fastapi
+uvicorn
+python-multipart

@@ -143,7 +143,7 @@ pytest tests/
 Execute the main script from the **root directory**:
 
 ```bash
-python src/main.py
+python -m src.main
 ```
 
 ### 4. Run the ANOVA Test
@@ -155,3 +155,117 @@ python -m src.compare_models
 
 The pipeline will Load -> Clean -> Engineer Features -> Split -> Train Baseline -> Evaluate -> (Conditionally Tune) -> Test -> Save Model.
 ---
+
+### 5. Preprocess External Input CSV Files
+If you want to preprocess holdout/input CSVs into model-ready feature columns:
+
+```bash
+python -m src.preprocess_input_csv data/input_1.csv data/input_2.csv
+```
+
+Default behavior:
+- Does NOT use train-derived stats.
+- Produces only model feature columns (same feature schema as training input X).
+
+Optional output directory:
+
+```bash
+python -m src.preprocess_input_csv data/input_1.csv --output-dir data/processed
+```
+
+Optional flags:
+
+```bash
+# Use train-derived stats (same as CV/Test preprocessing)
+python -m src.preprocess_input_csv data/input_1.csv --use-train-stats
+
+# Keep all processed columns instead of feature-only output
+python -m src.preprocess_input_csv data/input_1.csv --keep-all-columns
+```
+
+This creates files named `processed_<original_name>.csv`.
+
+## API Deployment And Metrics Comparison
+
+### 1. Start API Server
+Run from project root:
+
+```bash
+uvicorn src.api_app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Open API docs:
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
+
+### 2. Health And Model Metadata
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/model-info
+```
+
+### 3. Single Record Prediction
+
+```bash
+curl -X POST http://127.0.0.1:8000/predict-health \
+    -H "Content-Type: application/json" \
+    -d '{
+        "features": {
+            "Store": 1,
+            "DayOfWeek": 2,
+            "Promo": 1,
+            "StateHoliday": 0,
+            "SchoolHoliday": 0,
+            "StoreType": 1,
+            "Assortment": 1,
+            "CompetitionDistance": 500.0,
+            "Year": 2015,
+            "Month": 7,
+            "Day": 15
+        }
+    }'
+```
+
+### 4. Evaluate One Input File (All Metrics)
+This endpoint computes: RMSPE, MAE, RMSE, MAPE, R2.
+
+```bash
+curl -X POST http://127.0.0.1:8000/evaluate-file \
+    -H "Content-Type: application/json" \
+    -d '{
+        "input_file": "data/input_1.csv"
+    }'
+```
+
+### 5. Compare Multiple Input Files (All Metrics)
+This endpoint compares all files and returns metric rankings (best/worst) per metric.
+
+```bash
+curl -X POST http://127.0.0.1:8000/compare-input-files \
+    -H "Content-Type: application/json" \
+    -d '{
+        "input_files": [
+            "data/input_1.csv",
+            "data/input_2.csv",
+            "data/input_3.csv",
+            "data/input_4.csv"
+        ]
+    }'
+```
+
+### 6. Metrics History
+Each evaluate/compare run is persisted in `data/metrics_history.jsonl`.
+
+```bash
+curl "http://127.0.0.1:8000/metrics-history?limit=20"
+```
+
+### 7. Stress Testing
+Use the built-in stress script to measure latency and throughput:
+
+```bash
+python scripts/stress_test_api.py --url http://127.0.0.1:8000/predict-health --requests 500 --concurrency 25
+```
+
+Detailed stress test guide: `docs/api_stress_testing.md`

@@ -61,10 +61,12 @@ def process_data(df, train_stats=None):
 
     # Drop rows where store is closed (Sales=0)
     # Note: We do this for all sets to avoid dividing by zero in RMSPE
-    df = df[df['Open'] != 0]
+    df = df[df['Open'] != 0].copy()
 
     # feature engineering
-    df['Date'] = pd.to_datetime(df['Date'])
+    # Support mixed date formats across train/test/input files (e.g., YYYY-MM-DD and DD/MM/YYYY)
+    df['Date'] = pd.to_datetime(df['Date'], format='mixed', dayfirst=True, errors='coerce')
+    df = df[df['Date'].notna()].copy()
     df['Year'] = df['Date'].dt.year
     df['Month'] = df['Date'].dt.month
     df['Day'] = df['Date'].dt.day

@@ -15,6 +15,8 @@ def save_model(model, model_type):
 
     elif model_type == "XGBoost":
         MODEL_PATH = BASE_DIR/config['paths']['model_3']
+
+    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     
     joblib.dump(model, MODEL_PATH)
 
