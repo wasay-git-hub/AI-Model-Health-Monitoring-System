@@ -50,7 +50,7 @@ data:
 
 # every path required in any code goes here
 paths:
-  train_dataset: 'data/train.csv'
+  train_dataset: 'data/train_80.csv'
   store_dataset: 'data/store.csv'
   model_1: 'models/RandomForest.pkl'
   model_2: 'models/LinearRegression.pkl'
