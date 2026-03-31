@@ -60,7 +60,7 @@ def process_data(df, train_stats=None):
     df['PromoInterval'] = df['PromoInterval'].fillna("None")
 
     # Drop rows where store is closed (Sales=0)
-    # Note: We do this for all sets to avoid dividing by zero in RMSPE
+    # We do this for all sets to avoid dividing by zero in RMSPE
     df = df[df['Open'] != 0].copy()
 
     # feature engineering

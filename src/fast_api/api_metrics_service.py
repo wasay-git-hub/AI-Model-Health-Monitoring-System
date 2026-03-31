@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
@@ -9,19 +8,16 @@ from sklearn.metrics import (
     root_mean_squared_error,
 )
 
-from src.evaluation import get_rmspe
-from src.preprocessing import process_data
+from src.model_pipeline.evaluation import get_rmspe
+from src.model_pipeline.preprocessing import process_data
 
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 def _resolve_input_path(input_file):
     input_path = Path(input_file)
     if not input_path.is_absolute():
         input_path = BASE_DIR / input_path
     return input_path.resolve()
-
 
 def _load_input_with_store(input_path, store_dataset_path):
     raw_df = pd.read_csv(input_path, low_memory=False)
@@ -32,7 +28,6 @@ def _load_input_with_store(input_path, store_dataset_path):
 
     store_df = pd.read_csv(store_dataset_path)
     return pd.merge(raw_df, store_df, how="left", on="Store")
-
 
 def _compute_metrics(y_true, y_pred):
     non_zero = y_true != 0
@@ -52,7 +47,6 @@ def _compute_metrics(y_true, y_pred):
         "MAPE": mape,
         "R2": r2,
     }
-
 
 def evaluate_input_file(input_file, config, model):
     input_path = _resolve_input_path(input_file)
@@ -94,7 +88,6 @@ def evaluate_input_file(input_file, config, model):
         "metrics": metrics,
         "prediction_summary": prediction_summary,
     }
-
 
 def compare_input_files(input_files, config, model):
     results = [evaluate_input_file(path, config, model) for path in input_files]

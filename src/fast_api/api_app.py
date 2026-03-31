@@ -2,16 +2,15 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import List
-
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from src.api_history import append_metrics_history, read_metrics_history
-from src.api_model_loader import load_model_once
-from src.api_metrics_service import compare_input_files, evaluate_input_file
-from src.api_schemas import (
+from src.fast_api.api_history import append_metrics_history, read_metrics_history
+from src.fast_api.api_model_loader import load_model_once
+from src.fast_api.api_metrics_service import compare_input_files, evaluate_input_file
+from src.fast_api.api_schemas import (
     CompareInputFilesRequest,
     CompareInputFilesResponse,
     EvaluateFileRequest,
@@ -25,9 +24,7 @@ from src.api_schemas import (
 )
 from src.utils import load_params
 
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,14 +45,12 @@ async def lifespan(app: FastAPI):
 
     yield
 
-
 app = FastAPI(
     title="Rossmann Model Health API",
     description="API service for prediction and file-level metric evaluation/comparison.",
     version="1.0.0",
     lifespan=lifespan,
 )
-
 
 @app.get("/health", summary="Service health check")
 def health_check():
@@ -65,7 +60,6 @@ def health_check():
         "model_loaded": bool(app.state.model_loaded),
         "model_type": app.state.model_type,
     }
-
 
 @app.get("/model-info", summary="Model metadata")
 def model_info():
@@ -79,7 +73,6 @@ def model_info():
         "features": training_cfg["features"],
         "metrics_history_path": str(app.state.metrics_history_path),
     }
-
 
 @app.post(
     "/predict-health",
@@ -99,7 +92,6 @@ def predict_health(payload: PredictHealthRequest):
         model_type=app.state.model_type,
         timestamp=datetime.utcnow(),
     )
-
 
 @app.post(
     "/evaluate-file",
@@ -132,7 +124,6 @@ def evaluate_file(payload: EvaluateFileRequest):
     )
 
     return response
-
 
 @app.post(
     "/compare-input-files",
@@ -176,7 +167,6 @@ def compare_files(payload: CompareInputFilesRequest):
 
     return response
 
-
 @app.get(
     "/metrics-history",
     response_model=List[MetricsHistoryRecord],
@@ -186,7 +176,6 @@ def metrics_history(limit: int = Query(default=20, ge=1, le=200)):
     """Return recent metrics records from persistent JSONL history."""
     records = read_metrics_history(app.state.metrics_history_path, limit=limit)
     return [MetricsHistoryRecord(**record) for record in records]
-
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -199,7 +188,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         },
     )
 
-
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -210,7 +198,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "details": str(exc.detail),
         },
     )
-
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):

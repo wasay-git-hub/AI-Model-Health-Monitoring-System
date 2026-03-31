@@ -1,10 +1,10 @@
-from src.preprocessing import load_and_merge, split_raw_data, process_data, extract_X_y
-from src.model import train_model, model_prediction
+from src.model_pipeline.preprocessing import load_and_merge, split_raw_data, process_data, extract_X_y
+from src.model_pipeline.model import train_model, model_prediction
 from src.utils import load_params
-from src.model_serializer import save_model
-from src.evaluation import get_evaluations
-from src.data_loader import load_and_merge
-from src.optimization import tune_hyperparameters
+from src.model_pipeline.model_serializer import save_model
+from src.model_pipeline.evaluation import get_evaluations
+from src.model_pipeline.data_loader import load_and_merge
+from src.model_pipeline.optimization import tune_hyperparameters
 
 config = load_params()
 train_dataset = config['paths']['train_dataset']

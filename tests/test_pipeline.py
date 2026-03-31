@@ -7,7 +7,7 @@ import os
 # Ensure src can be imported
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.preprocessing import clean_data, feature_engineering, split_data
+from src.model_pipeline.preprocessing import clean_data, feature_engineering, split_data
 from src.utils import load_params
 
 @pytest.fixture

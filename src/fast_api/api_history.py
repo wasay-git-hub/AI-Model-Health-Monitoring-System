@@ -3,7 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-
 def append_metrics_history(history_path, endpoint, model_type, input_files, metrics_map, notes=None):
     record = {
         "run_id": str(uuid4()),
@@ -21,7 +20,6 @@ def append_metrics_history(history_path, endpoint, model_type, input_files, metr
         handle.write(json.dumps(record) + "\n")
 
     return record
-
 
 def read_metrics_history(history_path, limit=50):
     path = Path(history_path)

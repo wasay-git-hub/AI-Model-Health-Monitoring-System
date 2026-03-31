@@ -1,21 +1,15 @@
 from pathlib import Path
-
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
-
-from src.api_app import app
-
+from src.fast_api.api_app import app
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 
 @pytest.fixture
 def client():
     with TestClient(app) as test_client:
         yield test_client
-
 
 def _valid_predict_payload():
     return {
@@ -34,7 +28,6 @@ def _valid_predict_payload():
         }
     }
 
-
 def _make_small_eval_files(tmp_path):
     src_1 = BASE_DIR / "data" / "input_1.csv"
     src_2 = BASE_DIR / "data" / "input_2.csv"
@@ -50,14 +43,12 @@ def _make_small_eval_files(tmp_path):
 
     return file_1, file_2
 
-
 def test_health_endpoint(client):
     response = client.get("/health")
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "ok"
     assert "model_loaded" in body
-
 
 def test_model_info_endpoint(client):
     response = client.get("/model-info")
@@ -66,14 +57,12 @@ def test_model_info_endpoint(client):
     assert "features" in body
     assert "target" in body
 
-
 def test_predict_health_success(client):
     response = client.post("/predict-health", json=_valid_predict_payload())
     assert response.status_code == 200
     body = response.json()
     assert "prediction" in body
     assert isinstance(body["prediction"], float)
-
 
 def test_predict_health_validation_error(client):
     bad_payload = _valid_predict_payload()
@@ -83,7 +72,6 @@ def test_predict_health_validation_error(client):
     assert response.status_code == 422
     body = response.json()
     assert body["error_code"] == "VALIDATION_ERROR"
-
 
 def test_evaluate_file_success(client, tmp_path):
     file_1, _ = _make_small_eval_files(tmp_path)
@@ -97,7 +85,6 @@ def test_evaluate_file_success(client, tmp_path):
     for key in ["RMSPE", "MAE", "RMSE", "MAPE", "R2"]:
         assert key in metrics
 
-
 def test_compare_input_files_success(client, tmp_path):
     file_1, file_2 = _make_small_eval_files(tmp_path)
 
@@ -110,7 +97,6 @@ def test_compare_input_files_success(client, tmp_path):
     assert body["total_files"] == 2
     assert len(body["results"]) == 2
     assert len(body["rankings"]) == 5
-
 
 def test_metrics_history_success(client):
     response = client.get("/metrics-history")

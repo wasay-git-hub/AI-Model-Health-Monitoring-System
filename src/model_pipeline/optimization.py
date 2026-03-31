@@ -1,6 +1,6 @@
 from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
 from sklearn.metrics import make_scorer
-from src.evaluation import get_rmspe
+from src.model_pipeline.evaluation import get_rmspe
 from src.utils import load_params
 
 config = load_params()

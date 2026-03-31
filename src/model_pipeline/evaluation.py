@@ -32,13 +32,13 @@ def get_evaluations(y_true, y_pred):
 
     # Secondary Metrics
     print("\n[ SECONDARY METRICS ]")
-    print(f"Mean Absolute Percentage Error (MAPE):     {mape}%")
-    print(f"Mean Absolute Error (MAE):                 {mae}")
-    print(f"Root Mean Squared Error (RMSE):            {rmse}")
+    print(f"Mean Absolute Percentage Error (MAPE): {mape}%")
+    print(f"Mean Absolute Error (MAE): {mae}")
+    print(f"Root Mean Squared Error (RMSE): {rmse}")
 
     # Statistical Metric
     print("\n[ STATISTICAL METRIC ]")
-    print(f"R-Squared (R2 Score):                      {r2}")
+    print(f"R-Squared (R2 Score): {r2}")
 
     # returning all as a dictionary
     return {

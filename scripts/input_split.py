@@ -25,7 +25,7 @@ train_data = df[:split_index]
 # 20% (most recent holdout data)
 holdout_data = df[split_index:]
 
-# OPTIONAL: overwrite or save new training file
+# overwrite or save new training file
 train_data.to_csv(os.path.join(output_dir, "train_80.csv"), index=False)
 
 # Split holdout into 4 equal parts without DataFrame swapaxes warnings
@@ -37,7 +37,7 @@ for i, subset in enumerate(subsets, start=1):
     filename = f"input_{i}.csv"
     subset.to_csv(os.path.join(output_dir, filename), index=False)
 
-print("✅ Done!")
+print("Done!")
 print("Files created:")
 print("- train_80.csv (80% data)")
 for i in range(1, 5):

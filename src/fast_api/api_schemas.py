@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Literal, Optional
-
 from pydantic import BaseModel, ConfigDict, Field
-
 
 class PredictionFeatures(BaseModel):
     """Model-ready feature payload for a single prediction request."""
@@ -21,13 +19,11 @@ class PredictionFeatures(BaseModel):
     Month: int = Field(..., ge=1, le=12, description="Calendar month")
     Day: int = Field(..., ge=1, le=31, description="Day of month")
 
-
 class PredictHealthRequest(BaseModel):
     """Request schema for POST /predict-health."""
 
     model_config = ConfigDict(extra="forbid")
     features: PredictionFeatures
-
 
 class PredictHealthResponse(BaseModel):
     """Response schema for POST /predict-health."""
@@ -35,7 +31,6 @@ class PredictHealthResponse(BaseModel):
     prediction: float
     model_type: str
     timestamp: datetime
-
 
 class EvaluateFileRequest(BaseModel):
     """Request schema for POST /evaluate-file."""
@@ -48,7 +43,6 @@ class EvaluateFileRequest(BaseModel):
         description="If true, response includes a lightweight prediction summary",
     )
 
-
 class FileMetrics(BaseModel):
     """Evaluation metrics for one file."""
 
@@ -57,7 +51,6 @@ class FileMetrics(BaseModel):
     RMSE: float
     MAPE: float
     R2: float
-
 
 class EvaluateFileResponse(BaseModel):
     """Response schema for POST /evaluate-file."""
@@ -68,14 +61,12 @@ class EvaluateFileResponse(BaseModel):
     model_type: str
     timestamp: datetime
 
-
 class CompareInputFilesRequest(BaseModel):
     """Request schema for POST /compare-input-files."""
 
     model_config = ConfigDict(extra="forbid")
 
     input_files: List[str] = Field(..., min_length=2, description="CSV file paths to compare")
-
 
 class FileComparisonResult(BaseModel):
     """Per-file metrics returned by comparison endpoint."""
@@ -84,14 +75,12 @@ class FileComparisonResult(BaseModel):
     row_count: int
     metrics: FileMetrics
 
-
 class MetricRanking(BaseModel):
     """Best and worst file for a given metric."""
 
     metric: Literal["RMSPE", "MAE", "RMSE", "MAPE", "R2"]
     best_file: str
     worst_file: str
-
 
 class CompareInputFilesResponse(BaseModel):
     """Response schema for POST /compare-input-files."""
@@ -101,7 +90,6 @@ class CompareInputFilesResponse(BaseModel):
     results: List[FileComparisonResult]
     rankings: List[MetricRanking]
     timestamp: datetime
-
 
 class MetricsHistoryRecord(BaseModel):
     """Persistent record format used by metrics history endpoint and storage."""
@@ -113,7 +101,6 @@ class MetricsHistoryRecord(BaseModel):
     input_files: List[str]
     metrics: Dict[str, Dict[str, float]]
     notes: Optional[str] = None
-
 
 class ErrorResponse(BaseModel):
     """Consistent API error payload."""

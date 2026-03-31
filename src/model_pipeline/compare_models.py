@@ -4,7 +4,7 @@ import joblib
 import os
 from scipy import stats
 from src.utils import load_params
-from src.preprocessing import load_and_merge, clean_data, feature_engineering, split_data
+from src.model_pipeline.preprocessing import load_and_merge, clean_data, feature_engineering, split_data
 
 def run_model_comparison():
     print("Running Statistical Model Comparison (ANOVA)")

@@ -1,11 +1,9 @@
 from pathlib import Path
-
-from src.model_serializer import load_model
-
+from src.model_pipeline.model_serializer import load_model
 
 def resolve_model_artifact_path(config, model_type):
     """Return the configured model artifact path for the selected model type."""
-    base_dir = Path(__file__).resolve().parent.parent
+    base_dir = Path(__file__).resolve().parent.parent.parent
 
     if model_type == "Random Forest":
         return base_dir / config["paths"]["model_1"]
@@ -17,7 +15,6 @@ def resolve_model_artifact_path(config, model_type):
         return base_dir / config["paths"]["model_3"]
 
     raise ValueError(f"Model type '{model_type}' is not supported.")
-
 
 def load_model_once(config):
     """Load the configured model artifact for API startup initialization."""

@@ -1,11 +1,8 @@
 import argparse
 from pathlib import Path
-
 import pandas as pd
-
-from src.preprocessing import load_and_merge, process_data, split_raw_data
+from src.model_pipeline.preprocessing import load_and_merge, process_data, split_raw_data
 from src.utils import load_params
-
 
 def _prepare_train_stats(train_dataset, store_dataset):
     """
@@ -16,7 +13,6 @@ def _prepare_train_stats(train_dataset, store_dataset):
     train_raw, _, _ = split_raw_data(full_df)
     _, train_stats = process_data(train_raw, train_stats=None)
     return train_stats
-
 
 def _load_input_with_store(input_csv_path, store_dataset):
     """
@@ -31,7 +27,6 @@ def _load_input_with_store(input_csv_path, store_dataset):
 
     store_df = pd.read_csv(store_dataset)
     return pd.merge(df, store_df, how="left", on="Store")
-
 
 def preprocess_input_file(input_csv_path, output_csv_path=None, use_train_stats=False, features_only=True):
     config = load_params()
@@ -58,7 +53,6 @@ def preprocess_input_file(input_csv_path, output_csv_path=None, use_train_stats=
 
     processed_df.to_csv(output_csv_path, index=False)
     return output_csv_path, len(processed_df)
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -103,7 +97,6 @@ def main():
             features_only=not args.keep_all_columns,
         )
         print(f"Processed {input_path} -> {saved_to} ({rows} rows)")
-
 
 if __name__ == "__main__":
     main()
