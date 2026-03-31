@@ -4,7 +4,7 @@ from src.utils import load_params
 
 config = load_params()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 def save_model(model, model_type):
     if model_type == "Random Forest":

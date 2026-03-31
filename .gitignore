@@ -18,3 +18,8 @@ models/*.joblib
 # Ignore IDE settings
 .vscode/
 .idea/
+
+# MLflow tracking data and artifacts
+mlruns/
+mlartifacts/
+mlflow.db

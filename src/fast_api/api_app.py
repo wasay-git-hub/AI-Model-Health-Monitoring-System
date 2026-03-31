@@ -24,6 +24,9 @@ from src.fast_api.api_schemas import (
 )
 from src.utils import load_params
 
+import mlflow
+import mlflow.sklearn
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 @asynccontextmanager
@@ -31,6 +34,10 @@ async def lifespan(app: FastAPI):
     """Initialize API runtime state once at startup."""
     config = load_params()
     loaded_model, model_type, model_path = load_model_once(config)
+
+    # Initialize MLFlow
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_experiment("Sales_Monitoring")
 
     app.state.config = config
     app.state.model = loaded_model
@@ -46,7 +53,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Rossmann Model Health API",
+    title="Sales Model Health API",
     description="API service for prediction and file-level metric evaluation/comparison.",
     version="1.0.0",
     lifespan=lifespan,
@@ -106,6 +113,16 @@ def evaluate_file(payload: EvaluateFileRequest):
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    
+    # MLFlow logging start
+    with mlflow.start_run(run_name=f"Eval_{Path(payload.input_file).name}"):
+        mlflow.log_param("model_type", app.state.model_type)
+        mlflow.log_param("input_file", payload.input_file)
+        
+        # Log all metrics (RMSPE, MAE, etc.)
+        for metric_name, value in result["metrics"].items():
+            mlflow.log_metric(metric_name, value)
+    # MLFlow logging end
 
     response = EvaluateFileResponse(
         input_file=result["input_file"],

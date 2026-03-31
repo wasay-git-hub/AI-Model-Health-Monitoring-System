@@ -12,7 +12,6 @@ store_dataset = config['paths']['store_dataset']
 THRESHOLD = config['PERFORMANCE_THRESHOLD_RMSPE']
 
 def run_pipeline():
-    
     print("Step 1: Loading Data")
     df = load_and_merge(train_dataset, store_dataset)
 
