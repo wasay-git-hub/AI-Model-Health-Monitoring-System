@@ -1,43 +1,49 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, JSON, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-# Creating the Engine
 load_dotenv()
 
+# Setup Connection
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
+Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Initializing the Base Class
-Base = declarative_base()
+# SQLAlchemy 2.0 Base
+class Base(DeclarativeBase):
+    pass
 
-# Making the session
-Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
-
+# Table Model
 class ModelHealthLog(Base):
     __tablename__ = "model_health_logs"
 
-    log_id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.now)
-    model_type = Column(String(20)) 
-
-    endpoint = Column(String(30)) # which API endpoint was called
-    dataset_source = Column(String(30)) # name of the csv file evaluated
-    row_count = Column(Integer) # batch size of the data being evaluated
-
-    rmspe = Column(Float) # primary metric
+    log_id = Column(Integer, primary_key=True, autoincrement=True)
+    
+    # Use timezone-aware UTC for modern standards
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    # Increased lengths to prevent "StringDataRightTruncation" errors
+    model_type = Column(String(100)) 
+    endpoint = Column(String(100))
+    dataset_source = Column(String(500))
+    
+    row_count = Column(Integer)
+    rmspe = Column(Float)
     mae = Column(Float)
     mape = Column(Float)
     rmse = Column(Float)
     r2_score = Column(Float)
+    latency_ms = Column(Float)
 
-# Syncronizing python code with cloud
 def init_db():
-    Base.metadata.create_all(bind=engine)
-    print("Database tables initialized in the cloud.")
+    try:
+        # Create tables
+        Base.metadata.create_all(bind=engine)
+        print("Database tables initialized successfully in Supabase!")
+    except Exception as e:
+        print(f"Failed to connect: {e}")
 
 if __name__ == "__main__":
     init_db()
