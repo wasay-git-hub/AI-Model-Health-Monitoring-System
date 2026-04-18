@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from src.utils import load_params
-from src.fast_api.database import Session, ModelHealthLog
+from src.fast_api.database import Session, ModelHealthLog, SingleInferenceLog
 from src.fast_api.database import engine, Base, sessionmaker
 from src.fast_api.api_model_loader import load_model_once
 from src.fast_api.api_metrics_service import compare_input_files, evaluate_input_file
@@ -82,13 +82,14 @@ def model_info():
     summary="Predict sales for one feature payload",
 )
 def predict_health(payload: PredictHealthRequest):
-    """Predict sales value from one validated model-ready feature object and log latency."""
+    """Predict sales value from one feature object and log full inputs to the inference table."""
     start_time = time.perf_counter()
     
     try:
+        # Prepare data and predict
         feature_order = app.state.config["training_data"]["features"]
-        row = payload.features.model_dump()
-        feature_df = pd.DataFrame([row])[feature_order]
+        feature_dict = payload.features.model_dump()
+        feature_df = pd.DataFrame([feature_dict])[feature_order]
 
         prediction = float(app.state.model.predict(feature_df)[0])
         
@@ -97,29 +98,33 @@ def predict_health(payload: PredictHealthRequest):
         # Database Logging
         db = Session()
         try:
-            new_log = ModelHealthLog(
-                endpoint="predict-health",
+            new_inference = SingleInferenceLog(
                 model_type=app.state.model_type,
-                dataset_source="single_request",
-                row_count=1,
+                inputs=feature_dict,  # Stores the full JSON payload
+                prediction_value=prediction,
                 latency_ms=round(duration_ms, 2)
             )
-            db.add(new_log)
+            db.add(new_inference)
             db.commit()
+            db.refresh(new_inference)
+
+            # Capture the generated ID for feedback functionality
+            prediction_id = new_inference.inference_id
         except Exception as e:
             print(f"Database logging failed: {e}")
+            prediction_id = 0 # Fallback
         finally:
             db.close()
 
         return PredictHealthResponse(
             prediction=prediction,
+            prediction_id=prediction_id, # Returned for feedback loop
             model_type=app.state.model_type,
             timestamp=datetime.now(timezone.utc)
         )
         
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-
 
 @app.post(
     "/evaluate-file",

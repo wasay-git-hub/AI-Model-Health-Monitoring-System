@@ -31,6 +31,7 @@ class PredictHealthResponse(BaseModel):
     prediction: float
     model_type: str
     timestamp: datetime
+    prediction_id: int
 
 class EvaluateFileRequest(BaseModel):
     """Request schema for POST /evaluate-file."""

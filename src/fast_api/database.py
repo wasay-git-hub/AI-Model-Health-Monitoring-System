@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, JSON
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 load_dotenv()
@@ -15,7 +15,7 @@ Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 class Base(DeclarativeBase):
     pass
 
-# Table Model
+# Table Models
 class ModelHealthLog(Base):
     __tablename__ = "model_health_logs"
 
@@ -36,6 +36,19 @@ class ModelHealthLog(Base):
     rmse = Column(Float)
     r2_score = Column(Float)
     latency_ms = Column(Float)
+
+class SingleInferenceLog(Base):
+    __tablename__ = "single_inference_logs"
+
+    inference_id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    model_type = Column(String(50))
+    
+    # This stores the entire payload
+    inputs = Column(JSON) 
+    prediction_value = Column(Float)
+    latency_ms = Column(Float)
+    actual_sales = Column(Float, nullable=True)
 
 def init_db():
     try:
