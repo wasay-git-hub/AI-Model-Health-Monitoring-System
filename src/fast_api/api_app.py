@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
     config = load_params()
     loaded_model, model_type, model_path = load_model_once(config)
 
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_tracking_uri("file:./mlruns")
     mlflow.set_experiment("Sales_Monitoring")
 
     app.state.config = config
@@ -65,6 +65,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="src/frontend"), name="static")
 
 @app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False) # Add this
 async def read_index():
     return FileResponse("src/frontend/index.html")
 
@@ -188,11 +189,18 @@ def submit_feedback(prediction_id: int, actual_sales: float):
     finally:
         db.close()
 
-@app.get("/metrics-history", summary="Query Supabase history")
+@app.get("/metrics-history")
 def metrics_history(limit: int = Query(default=20, ge=1, le=200)):
     db = Session()
     try:
-        return db.query(ModelHealthLog).order_by(ModelHealthLog.timestamp.desc()).limit(limit).all()
+        # We add a print here to see if the function is even starting
+        print("Fetching history from Supabase...") 
+        data = db.query(ModelHealthLog).order_by(ModelHealthLog.timestamp.desc()).limit(limit).all()
+        print(f"Successfully fetched {len(data)} rows.")
+        return data
+    except Exception as e:
+        print(f"CRITICAL SQL ERROR: {e}") # This will show the real error in your terminal
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
 
