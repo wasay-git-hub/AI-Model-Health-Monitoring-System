@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SalesWatch — Predict</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0a0b0d;
+      --surface:  #111318;
+      --card:     #161a22;
+      --border:   #1f2533;
+      --accent:   #00e5a0;
+      --accent2:  #ff6b35;
+      --accent3:  #4d9eff;
+      --text:     #e8ecf4;
+      --muted:    #5a6480;
+      --warn:     #ffb347;
+      --danger:   #ff4757;
+      --mono:     'Space Mono', monospace;
+      --sans:     'Syne', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,11,13,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 60px;
+    }
+    .logo { font-family: var(--mono); font-size: 1rem; color: var(--accent); letter-spacing: -0.03em; display: flex; align-items: center; gap: 0.5rem; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 0.4rem 0.75rem; border-radius: 4px; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: rgba(0,229,160,0.08); }
+    .nav-status { display: flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s ease-in-out infinite; }
+
+    main { position: relative; z-index: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+    }
+    .page-title { font-size: clamp(1.8rem,4vw,3rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+    .page-title span { color: var(--accent3); }
+    .page-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .endpoint-pill { font-family: var(--mono); font-size: 0.65rem; padding: 0.4rem 0.8rem; background: rgba(77,158,255,0.1); border: 1px solid rgba(77,158,255,0.3); color: var(--accent3); border-radius: 4px; letter-spacing: 0.06em; }
+
+    .predict-layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media(max-width:900px){ .predict-layout{grid-template-columns:1fr} }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .panel-title { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; }
+
+    /* Form */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:600px){ .form-grid{grid-template-columns:1fr} }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .form-label .required { color: var(--accent2); }
+    .form-hint { font-family: var(--mono); font-size: 0.55rem; color: var(--muted); opacity: 0.7; }
+
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 0.6rem 0.75rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent3);
+      box-shadow: 0 0 0 3px rgba(77,158,255,0.1);
+    }
+    input.error { border-color: var(--danger); }
+    .field-error { font-family: var(--mono); font-size: 0.58rem; color: var(--danger); display: none; }
+    .field-error.show { display: block; }
+
+    .form-divider {
+      grid-column: 1 / -1;
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0.5rem 0;
+    }
+    .form-section-label {
+      grid-column: 1 / -1;
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+
+    .btn-row { margin-top: 1.5rem; display: flex; gap: 0.75rem; align-items: center; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      padding: 0.7rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary:hover { background: #00ffc8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,229,160,0.3); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.7rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+
+    /* Result panel */
+    .result-panel {
+      position: sticky;
+      top: 80px;
+      animation-delay: 0.1s;
+    }
+
+    .result-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--muted);
+      gap: 1rem;
+    }
+    .result-empty-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .result-empty-text { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.06em; }
+
+    .result-display { display: none; }
+    .result-display.show { display: block; }
+
+    .result-value-wrap {
+      text-align: center;
+      padding: 2rem 1rem;
+      background: var(--surface);
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .result-label { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .result-value {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .result-currency { font-size: 1.2rem; color: var(--muted); margin-right: 4px; }
+    .result-model { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-top: 0.5rem; }
+
+    .result-breakdown { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .result-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+    }
+    .result-row-key { color: var(--muted); }
+    .result-row-val { color: var(--text); }
+
+    .confidence-bar { margin-top: 0.5rem; }
+    .conf-label { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .conf-track { background: var(--surface); border-radius: 2px; height: 6px; overflow: hidden; }
+    .conf-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent3), var(--accent)); width: 0; transition: width 1s ease; }
+
+    /* Spinner */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(0,229,160,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* Raw request display */
+    .request-preview {
+      margin-top: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .request-preview-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+    .request-preview pre {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent3);
+      padding: 0.75rem;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--accent); color: var(--accent); }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+
+    footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 0.62rem; color: var(--muted); position: relative; z-index: 1; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><div class="logo-dot"></div>SALESWATCH</div>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="predict.html" class="active">Predict</a>
+    <a href="evaluate.html">Evaluate</a>
+  </div>
+  <div class="nav-status"><div class="status-dot"></div>API ONLINE</div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Single <span>Prediction</span></h1>
+      <p class="page-sub">POST /predict-health · Real-time Sales Forecast</p>
+    </div>
+    <div class="endpoint-pill">POST /predict-health</div>
+  </div>
+
+  <div class="predict-layout">
+    <!-- Form -->
+    <div class="panel">
+      <div class="panel-title">Feature Input — 11 Required Fields</div>
+      <div class="form-grid">
+
+        <div class="form-section-label">Store Info</div>
+
+        <div class="form-group">
+          <label class="form-label" for="store">Store ID <span class="required">*</span></label>
+          <input type="number" id="store" min="1" placeholder="e.g. 42" value="42" />
+          <span class="field-error" id="store-err">Must be ≥ 1</span>
+          <span class="form-hint">ge=1 · Store identifier</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="dow">Day of Week <span class="required">*</span></label>
+          <select id="dow">
+            <option value="1">1 — Monday</option>
+            <option value="2">2 — Tuesday</option>
+            <option value="3">3 — Wednesday</option>
+            <option value="4" selected>4 — Thursday</option>
+            <option value="5">5 — Friday</option>
+            <option value="6">6 — Saturday</option>
+            <option value="7">7 — Sunday</option>
+          </select>
+          <span class="form-hint">1–7 · Day index</span>
+        </div>
+
+        <hr class="form-divider" />
+        <div class="form-section-label">Promotions &amp; Holidays</div>
+
+        <div class="form-group">
+          <label class="form-label" for="promo">Promo <span class="required">*</span></label>
+          <select id="promo">
+            <option value="0">0 — No promotion</option>
+            <option value="1" selected>1 — Promotion active</option>
+          </select>
+          <span class="form-hint">0 or 1 · Promotion flag</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="stateholiday">State Holiday <span class="required">*</span></label>
+          <select id="stateholiday">
+            <option value="0" selected>0 — None</option>
+            <option value="1">1 — Public holiday (a)</option>
+            <option value="2">2 — Easter (b)</option>
+            <option value="3">3 — Christmas (c)</option>
+            <option value="4">4 — Other (d)</option>
+          </select>
+          <span class="form-hint">0–4 · Mapped holiday</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="schoolholiday">School Holiday <span class="required">*</span></label>
+          <select id="schoolholiday">
+            <option value="0" selected>0 — No</option>
+            <option value="1">1 — Yes</option>
+          </select>
+          <span class="form-hint">0 or 1 · School holiday</span>
+        </div>
+
+        <hr class="form-divider" />
+        <div class="form-section-label">Store Characteristics</div>
+
+        <div class="form-group">
+          <label class="form-label" for="storetype">Store Type <span class="required">*</span></label>
+          <select id="storetype">
+            <option value="1" selected>1 — Type a</option>
+            <option value="2">2 — Type b</option>
+            <option value="3">3 — Type c</option>
+            <option value="4">4 — Type d</option>
+          </select>
+          <span class="form-hint">1–4 · Mapped store type</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="assortment">Assortment <span class="required">*</span></label>
+          <select id="assortment">
+            <option value="1" selected>1 — Basic (a)</option>
+            <option value="2">2 — Extra (b)</option>
+            <option value="3">3 — Extended (c)</option>
+          </select>
+          <span class="form-hint">1–3 · Mapped assortment</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="compdist">Competition Distance <span class="required">*</span></label>
+          <input type="number" id="compdist" min="0" step="0.1" placeholder="e.g. 1000.0" value="1270.0" />
+          <span class="field-error" id="compdist-err">Must be ≥ 0</span>
+          <span class="form-hint">float ge=0 · Metres to rival</span>
+        </div>
+
+        <hr class="form-divider" />
+        <div class="form-section-label">Date Components</div>
+
+        <div class="form-group">
+          <label class="form-label" for="year">Year <span class="required">*</span></label>
+          <input type="number" id="year" min="1900" max="2100" placeholder="e.g. 2015" value="2015" />
+          <span class="field-error" id="year-err">1900–2100</span>
+          <span class="form-hint">1900–2100 · Calendar year</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="month">Month <span class="required">*</span></label>
+          <input type="number" id="month" min="1" max="12" placeholder="1–12" value="7" />
+          <span class="field-error" id="month-err">1–12</span>
+          <span class="form-hint">1–12 · Calendar month</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="day">Day <span class="required">*</span></label>
+          <input type="number" id="day" min="1" max="31" placeholder="1–31" value="15" />
+          <span class="field-error" id="day-err">1–31</span>
+          <span class="form-hint">1–31 · Day of month</span>
+        </div>
+
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="submitBtn" onclick="submitPrediction()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run Prediction
+        </button>
+        <button class="btn-secondary" onclick="resetForm()">Reset</button>
+        <div class="spinner" id="spinner"></div>
+      </div>
+
+      <!-- Live JSON preview -->
+      <div class="request-preview" style="margin-top:1.5rem">
+        <div class="request-preview-header">
+          <span>REQUEST PAYLOAD</span>
+          <span style="color:var(--accent3)">POST /predict-health</span>
+        </div>
+        <pre id="jsonPreview">{}</pre>
+      </div>
+    </div>
+
+    <!-- Result sidebar -->
+    <div class="panel result-panel" style="animation-delay:0.15s">
+      <div class="panel-title">Prediction Result</div>
+
+      <div class="result-empty" id="resultEmpty">
+        <div class="result-empty-icon">◎</div>
+        <div class="result-empty-text">Fill in the feature fields<br>and run a prediction</div>
+      </div>
+
+      <div class="result-display" id="resultDisplay">
+        <div class="result-value-wrap">
+          <div class="result-label">Predicted Sales</div>
+          <div class="result-value">
+            <span class="result-currency">€</span><span id="predValue">0</span>
+          </div>
+          <div class="result-model" id="predModel">XGBoost · --</div>
+        </div>
+
+        <div class="result-breakdown" id="predBreakdown"></div>
+
+        <div class="confidence-bar">
+          <div class="conf-label">Model Confidence Proxy (R²)</div>
+          <div class="conf-track">
+            <div class="conf-fill" id="confFill"></div>
+          </div>
+        </div>
+
+        <div class="result-breakdown" style="margin-top:1rem" id="rawResponse"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>SALESWATCH v1.0 · DS201 Semester Project</span>
+  <span>API: http://127.0.0.1:8000</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:8000';
+
+  function getFormValues() {
+    return {
+      Store: parseInt(document.getElementById('store').value),
+      DayOfWeek: parseInt(document.getElementById('dow').value),
+      Promo: parseInt(document.getElementById('promo').value),
+      StateHoliday: parseInt(document.getElementById('stateholiday').value),
+      SchoolHoliday: parseInt(document.getElementById('schoolholiday').value),
+      StoreType: parseInt(document.getElementById('storetype').value),
+      Assortment: parseInt(document.getElementById('assortment').value),
+      CompetitionDistance: parseFloat(document.getElementById('compdist').value),
+      Year: parseInt(document.getElementById('year').value),
+      Month: parseInt(document.getElementById('month').value),
+      Day: parseInt(document.getElementById('day').value),
+    };
+  }
+
+  function updatePreview() {
+    const features = getFormValues();
+    const payload = { features };
+    document.getElementById('jsonPreview').textContent = JSON.stringify(payload, null, 2);
+  }
+
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+  updatePreview();
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✓ ' : '✗ ') + msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  async function submitPrediction() {
+    const features = getFormValues();
+    const payload = { features };
+
+    const btn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('spinner');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+
+    try {
+      const res = await fetch(`${API_BASE}/predict-health`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || 'Prediction failed', 'error');
+        return;
+      }
+
+      displayResult(data, features);
+      showToast('Prediction completed successfully');
+
+    } catch(e) {
+      // Demo mode — simulate result when API is offline
+      const simulated = simulatePrediction(features);
+      displayResult(simulated, features);
+      showToast('Demo mode: API offline, showing simulated result', 'error');
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function simulatePrediction(f) {
+    // Simple simulation based on known model behavior
+    let base = 5000;
+    base += f.Store * 2.5;
+    base += f.Promo * 1800;
+    base -= f.DayOfWeek === 7 ? 2000 : 0;
+    base += f.Month >= 11 ? 1200 : 0;
+    base -= f.CompetitionDistance < 500 ? 400 : 0;
+    const noise = (Math.random() - 0.5) * 600;
+    return {
+      prediction: Math.max(0, base + noise),
+      model_type: 'XGBoost (simulated)',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  function displayResult(data, features) {
+    document.getElementById('resultEmpty').style.display = 'none';
+    const disp = document.getElementById('resultDisplay');
+    disp.classList.add('show');
+
+    const pred = data.prediction;
+    document.getElementById('predValue').textContent = pred.toLocaleString('en-GB', {maximumFractionDigits:2});
+    document.getElementById('predModel').textContent = `${data.model_type} · ${new Date(data.timestamp).toLocaleTimeString()}`;
+
+    // Breakdown
+    const bd = document.getElementById('predBreakdown');
+    bd.innerHTML = '';
+    const rows = [
+      ['Store', features.Store],
+      ['Promo active', features.Promo ? 'Yes ↑' : 'No'],
+      ['Day of week', ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][features.DayOfWeek-1]],
+      ['Month', features.Month],
+      ['Competition dist.', `${features.CompetitionDistance.toLocaleString()} m`],
+    ];
+    rows.forEach(([k,v]) => {
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      row.innerHTML = `<span class="result-row-key">${k}</span><span class="result-row-val">${v}</span>`;
+      bd.appendChild(row);
+    });
+
+    // Confidence proxy
+    setTimeout(() => {
+      document.getElementById('confFill').style.width = '53%';
+    }, 200);
+
+    // Raw
+    const raw = document.getElementById('rawResponse');
+    raw.innerHTML = `
+      <div class="result-row">
+        <span class="result-row-key">Raw prediction</span>
+        <span class="result-row-val" style="color:var(--accent)">${pred.toFixed(4)}</span>
+      </div>`;
+  }
+
+  function resetForm() {
+    document.getElementById('store').value = '';
+    document.getElementById('compdist').value = '';
+    document.getElementById('year').value = '';
+    document.getElementById('month').value = '';
+    document.getElementById('day').value = '';
+    document.getElementById('resultEmpty').style.display = 'flex';
+    document.getElementById('resultDisplay').classList.remove('show');
+    updatePreview();
+  }
+</script>
+</body>
+</html>
