@@ -173,9 +173,9 @@ def evaluate_file(payload: EvaluateFileRequest):
         timestamp=datetime.now(timezone.utc)
     )
 
-@app.post("/feedback", summary="Submit ground truth for a prediction")
+@app.post("/feedback")
 def submit_feedback(prediction_id: int, actual_sales: float):
-    """Updates a single inference record with actual sales to calculate error."""
+    # This matches the JS call: /feedback?prediction_id=...&actual_sales=...
     db = Session()
     try:
         record = db.query(SingleInferenceLog).filter(SingleInferenceLog.inference_id == prediction_id).first()
@@ -184,7 +184,7 @@ def submit_feedback(prediction_id: int, actual_sales: float):
         
         record.actual_sales = actual_sales
         db.commit()
-        return {"status": "success", "prediction_id": prediction_id, "updated": True}
+        return {"status": "success"}
     finally:
         db.close()
 

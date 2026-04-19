@@ -25,365 +25,95 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
 
-    /* Noise texture overlay */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
+      content: ''; position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
+      pointer-events: none; z-index: 0; opacity: 0.4;
     }
 
-    /* ─── Nav ─── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,11,13,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      height: 60px;
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,11,13,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 60px;
     }
-    .logo {
-      font-family: var(--mono);
-      font-size: 1rem;
-      color: var(--accent);
-      letter-spacing: -0.03em;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+    .logo { font-family: var(--mono); font-size: 1rem; color: var(--accent); letter-spacing: -0.03em; display: flex; align-items: center; gap: 0.5rem; }
     .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
     .nav-links { display: flex; gap: 0.25rem; }
-    .nav-links a {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      padding: 0.4rem 0.75rem;
-      border-radius: 4px;
-      transition: all 0.2s;
-    }
-    .nav-links a:hover, .nav-links a.active {
-      color: var(--accent);
-      background: rgba(0,229,160,0.08);
-    }
-
-    .nav-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      color: var(--muted);
-    }
+    .nav-links a { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 0.4rem 0.75rem; border-radius: 4px; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: rgba(0,229,160,0.08); }
+    .nav-status { display: flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s ease-in-out infinite; }
 
-    /* ─── Layout ─── */
     main { position: relative; z-index: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; }
 
-    /* ─── Hero strip ─── */
-    .hero {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .hero-title {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.04em;
-    }
+    .hero { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .hero-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
     .hero-title span { color: var(--accent); }
-    .hero-sub {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 0.5rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .hero-timestamp {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-align: right;
-    }
+    .hero-sub { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .hero-timestamp { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-align: right; }
     .hero-timestamp strong { display: block; color: var(--text); font-size: 1rem; }
 
-    /* ─── KPI row ─── */
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
     @media(max-width: 900px){ .kpi-row{grid-template-columns:repeat(2,1fr)} }
 
-    .kpi-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp 0.5s ease both;
-    }
-    .kpi-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--accent-line, var(--accent));
-    }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; position: relative; overflow: hidden; animation: fadeUp 0.5s ease both; }
+    .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-line, var(--accent)); }
     .kpi-card:nth-child(2)::after { --accent-line: var(--accent2); }
     .kpi-card:nth-child(3)::after { --accent-line: var(--accent3); }
     .kpi-card:nth-child(4)::after { --accent-line: var(--warn); }
 
-    @keyframes fadeUp {
-      from { opacity:0; transform:translateY(16px) }
-      to   { opacity:1; transform:translateY(0) }
-    }
-    .kpi-card:nth-child(1){animation-delay:0.05s}
-    .kpi-card:nth-child(2){animation-delay:0.1s}
-    .kpi-card:nth-child(3){animation-delay:0.15s}
-    .kpi-card:nth-child(4){animation-delay:0.2s}
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
 
-    .kpi-label {
-      font-family: var(--mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.75rem;
-    }
-    .kpi-value {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
+    .kpi-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+    .kpi-value { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
     .kpi-unit { font-size: 0.85rem; font-weight: 400; color: var(--muted); margin-left: 2px; }
-    .kpi-delta {
-      margin-top: 0.5rem;
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      color: var(--accent);
-    }
+    .kpi-delta { margin-top: 0.5rem; font-family: var(--mono); font-size: 0.65rem; color: var(--accent); }
     .kpi-delta.warn { color: var(--warn); }
-    .kpi-delta.bad  { color: var(--danger); }
 
-    /* ─── Grid ─── */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    @media(max-width:800px){ .grid-2{grid-template-columns:1fr} }
+    .grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; animation: fadeUp 0.5s ease both; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .panel-title { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .panel-badge { font-family: var(--mono); font-size: 0.6rem; padding: 0.2rem 0.5rem; border-radius: 3px; border: 1px solid var(--accent); color: var(--accent); }
 
-    .grid-3-1 {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    @media(max-width:900px){ .grid-3-1{grid-template-columns:1fr} }
-
-    /* ─── Panel ─── */
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.5rem;
-      animation: fadeUp 0.5s ease both;
-    }
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
-    .panel-title {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .panel-badge {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 3px;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      letter-spacing: 0.08em;
-    }
-    .panel-badge.warn { border-color: var(--warn); color: var(--warn); }
-
-    /* ─── Metrics table ─── */
     .metrics-table { width: 100%; border-collapse: collapse; }
-    .metrics-table th {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: left;
-      padding: 0.5rem 0.75rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .metrics-table td {
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      padding: 0.65rem 0.75rem;
-      border-bottom: 1px solid rgba(31,37,51,0.5);
-      color: var(--text);
-    }
-    .metrics-table tr:last-child td { border-bottom: none; }
-    .metrics-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .metrics-table th { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .metrics-table td { font-family: var(--mono); font-size: 0.78rem; padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(31,37,51,0.5); }
     .metric-name { color: var(--muted); font-size: 0.65rem; }
-    .metric-val { color: var(--text); }
     .metric-good { color: var(--accent); }
     .metric-warn { color: var(--warn); }
-    .metric-bad  { color: var(--danger); }
 
-    /* ─── Bar chart ─── */
-    .bar-chart { display: flex; flex-direction: column; gap: 0.75rem; }
-    .bar-row { display: grid; grid-template-columns: 80px 1fr 60px; align-items: center; gap: 0.75rem; }
-    .bar-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-align: right; }
-    .bar-track { background: var(--surface); border-radius: 2px; height: 8px; overflow: hidden; }
-    .bar-fill {
-      height: 100%;
-      border-radius: 2px;
-      background: var(--bar-color, var(--accent));
-      transition: width 1s cubic-bezier(0.16,1,0.3,1);
-      width: 0;
-    }
-    .bar-fill.animate { width: var(--bar-w); }
-    .bar-val { font-family: var(--mono); font-size: 0.65rem; color: var(--text); }
-
-    /* ─── Feature importance ─── */
-    .feat-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .feat-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 0.6rem;
-      background: var(--surface);
-      border-radius: 4px;
-    }
-    .feat-rank {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      color: var(--muted);
-      width: 18px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .feat-name { font-size: 0.78rem; flex: 1; }
-    .feat-bar-wrap { flex: 2; background: var(--bg); border-radius: 2px; height: 6px; overflow: hidden; }
-    .feat-bar { height: 100%; border-radius: 2px; background: var(--accent3); width: var(--fw); }
-    .feat-pct { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); width: 36px; text-align: right; }
-
-    /* ─── History list ─── */
-    .history-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; }
-    .history-list::-webkit-scrollbar { width: 4px; }
-    .history-list::-webkit-scrollbar-track { background: var(--surface); }
-    .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .hist-item {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 0.5rem;
-      align-items: center;
-      padding: 0.6rem 0.75rem;
-      background: var(--surface);
-      border-radius: 4px;
-      font-family: var(--mono);
-      font-size: 0.65rem;
-    }
-    .hist-file { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .hist-rmspe { padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.6rem; }
-    .hist-rmspe.good { background: rgba(0,229,160,0.12); color: var(--accent); }
-    .hist-rmspe.warn { background: rgba(255,179,71,0.12); color: var(--warn); }
-    .hist-rmspe.bad  { background: rgba(255,71,87,0.12);  color: var(--danger); }
-    .hist-time { color: var(--muted); font-size: 0.6rem; }
-
-    /* ─── Model info ─── */
-    .model-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    .info-item { padding: 0.6rem 0.75rem; background: var(--surface); border-radius: 4px; }
-    .info-key { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-    .info-val { font-family: var(--mono); font-size: 0.75rem; color: var(--text); margin-top: 0.2rem; word-break: break-all; }
-    .info-val.accent { color: var(--accent); }
-
-    /* ─── Threshold indicator ─── */
-    .threshold-gauge {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: var(--surface);
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-    .gauge-title { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+    .threshold-gauge { margin-top: 1rem; padding: 1rem; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); }
+    .gauge-title { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-bottom: 0.75rem; }
     .gauge-track { position: relative; height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; }
-    .gauge-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--warn) 70%, var(--danger)); width: 33%; transition: width 1s ease; }
+    .gauge-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--warn) 70%, var(--danger)); width: 0%; transition: width 1s ease; }
     .gauge-threshold { position: absolute; top: -3px; bottom: -3px; width: 2px; background: white; left: 20%; }
     .gauge-labels { display: flex; justify-content: space-between; margin-top: 0.4rem; font-family: var(--mono); font-size: 0.58rem; color: var(--muted); }
 
-    /* ─── Footer ─── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 1.5rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: var(--mono);
-      font-size: 0.62rem;
-      color: var(--muted);
-      position: relative;
-      z-index: 1;
-    }
+    .history-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+    .hist-item { display: grid; grid-template-columns: 1fr auto auto; gap: 0.5rem; align-items: center; padding: 0.6rem 0.75rem; background: var(--surface); border-radius: 4px; font-family: var(--mono); font-size: 0.65rem; }
+    .hist-rmspe.good { color: var(--accent); }
+    .hist-rmspe.warn { color: var(--warn); }
+    .hist-time { color: var(--muted); font-size: 0.6rem; }
+
+    footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 0.62rem; color: var(--muted); }
   </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo">
-    <div class="logo-dot"></div>
-    SALESWATCH
-  </div>
+  <div class="logo"><div class="logo-dot"></div>SALESWATCH</div>
   <div class="nav-links">
-    <a href="index.html" class="active">Dashboard</a>
-    <a href="predict.html">Predict</a>
-    <a href="evaluate.html">Evaluate</a>
+    <a href="/" class="active">Dashboard</a>
+    <a href="/predict.html">Predict</a>
+    <a href="/evaluate.html">Evaluate</a>
   </div>
-  <div class="nav-status">
-    <div class="status-dot"></div>
-    API ONLINE
-  </div>
+  <div class="nav-status"><div class="status-dot"></div>API ONLINE</div>
 </nav>
 
 <main>
@@ -398,246 +128,60 @@
     </div>
   </div>
 
-  <!-- KPI Row -->
   <div class="kpi-row">
     <div class="kpi-card">
       <div class="kpi-label">Model Type</div>
-      <div class="kpi-value" style="font-size:1.4rem;color:var(--accent)">XGBoost</div>
-      <div class="kpi-delta">v1.0 · Loaded ✓</div>
+      <div class="kpi-value" id="model-type-display" style="font-size:1.4rem;color:var(--accent)">--</div>
+      <div class="kpi-delta">Status: Active</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Avg RMSPE</div>
-      <div class="kpi-value">0.31<span class="kpi-unit">err</span></div>
-      <div class="kpi-delta warn">↑ Above 0.20 threshold</div>
+      <div class="kpi-value">--<span class="kpi-unit">err</span></div>
+      <div class="kpi-delta" id="rmspe-threshold-text">Target: < 0.35</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Avg R² Score</div>
-      <div class="kpi-value">0.53<span class="kpi-unit"></span></div>
-      <div class="kpi-delta">Moderate fit across files</div>
+      <div class="kpi-value">--<span class="kpi-unit"></span></div>
+      <div class="kpi-delta">Statistical Fit</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Eval Runs</div>
-      <div class="kpi-value">9<span class="kpi-unit">runs</span></div>
-      <div class="kpi-delta">4 files evaluated</div>
+      <div class="kpi-label">Total Logs</div>
+      <div class="kpi-value">--<span class="kpi-unit">runs</span></div>
+      <div class="kpi-delta">Inference History</div>
     </div>
   </div>
 
-  <!-- Row 2: Metrics per file + Feature importance -->
-  <div class="grid-3-1" style="animation-delay:0.25s">
-    <div class="panel" style="animation-delay:0.3s">
+  <div class="grid-3-1">
+    <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Per-File Metrics — Recent Evaluations</span>
-        <span class="panel-badge warn">RMSPE &gt; threshold</span>
+        <span class="panel-title">Recent Evaluation Metrics</span>
+        <span class="panel-badge" id="alert-badge">FETCHING...</span>
       </div>
       <table class="metrics-table">
         <thead>
-          <tr>
-            <th>File</th>
-            <th>RMSPE</th>
-            <th>MAE</th>
-            <th>RMSE</th>
-            <th>MAPE</th>
-            <th>R²</th>
-          </tr>
+          <tr><th>File</th><th>RMSPE</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>R²</th></tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="metric-name">processed_input_1</td>
-            <td class="metric-warn">0.3300</td>
-            <td>1281.25</td>
-            <td>1963.03</td>
-            <td>0.1924</td>
-            <td>0.5323</td>
-          </tr>
-          <tr>
-            <td class="metric-name">processed_input_2</td>
-            <td class="metric-warn">0.3100</td>
-            <td>1447.51</td>
-            <td>2192.10</td>
-            <td>0.2008</td>
-            <td>0.5381</td>
-          </tr>
-          <tr>
-            <td class="metric-name">processed_input_3</td>
-            <td class="metric-warn">0.2800</td>
-            <td>1450.58</td>
-            <td>2189.35</td>
-            <td>0.1908</td>
-            <td>0.4998</td>
-          </tr>
-          <tr>
-            <td class="metric-name">processed_input_4</td>
-            <td class="metric-warn">0.2700</td>
-            <td>1314.68</td>
-            <td>1973.77</td>
-            <td>0.1893</td>
-            <td class="metric-good">0.5762</td>
-          </tr>
+        <tbody id="metrics-tbody">
+          <!-- Live data injected here -->
         </tbody>
       </table>
     </div>
 
-    <div class="panel" style="animation-delay:0.35s">
-      <div class="panel-header">
-        <span class="panel-title">RMSPE Threshold</span>
-      </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Health Status</span></div>
       <div class="threshold-gauge">
-        <div class="gauge-title">Current vs Limit (0.20)</div>
+        <div class="gauge-title">RMSPE vs Threshold (0.35)</div>
         <div class="gauge-track">
-          <div class="gauge-fill" id="gaugeFill" style="width:33%"></div>
-          <div class="gauge-threshold" style="left:20%"></div>
+          <div class="gauge-fill" id="gaugeFill"></div>
+          <div class="gauge-threshold"></div>
         </div>
-        <div class="gauge-labels"><span>0.00</span><span>0.20</span><span>0.40</span><span>0.60+</span></div>
+        <div class="gauge-labels"><span>0.00</span><span>0.35</span><span>0.7+</span></div>
       </div>
-      <div class="threshold-gauge" style="margin-top:0.75rem">
-        <div class="gauge-title">R² Score</div>
-        <div class="gauge-track">
-          <div class="gauge-fill" style="width:53%;background:var(--accent3)"></div>
-        </div>
-        <div class="gauge-labels"><span>0.0</span><span>0.5</span><span>0.75</span><span>1.0</span></div>
-      </div>
-      <div style="margin-top:1rem">
-        <div class="info-key" style="margin-bottom:0.5rem">Avg Error by File</div>
-        <div class="bar-chart">
-          <div class="bar-row">
-            <div class="bar-label">Input 1</div>
-            <div class="bar-track"><div class="bar-fill" style="--bar-color:var(--accent2);--bar-w:82%"></div></div>
-            <div class="bar-val">1281</div>
-          </div>
-          <div class="bar-row">
-            <div class="bar-label">Input 2</div>
-            <div class="bar-track"><div class="bar-fill" style="--bar-color:var(--accent2);--bar-w:100%"></div></div>
-            <div class="bar-val">1448</div>
-          </div>
-          <div class="bar-row">
-            <div class="bar-label">Input 3</div>
-            <div class="bar-track"><div class="bar-fill" style="--bar-color:var(--accent2);--bar-w:99%"></div></div>
-            <div class="bar-val">1451</div>
-          </div>
-          <div class="bar-row">
-            <div class="bar-label">Input 4</div>
-            <div class="bar-track"><div class="bar-fill" style="--bar-color:var(--accent);--bar-w:84%"></div></div>
-            <div class="bar-val">1315</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Row 3: Feature importance + recent history -->
-  <div class="grid-2">
-    <div class="panel" style="animation-delay:0.4s">
-      <div class="panel-header">
-        <span class="panel-title">Feature Importance (XGBoost)</span>
-        <span class="panel-badge">11 Features</span>
-      </div>
-      <div class="feat-list">
-        <div class="feat-item">
-          <div class="feat-rank">1</div>
-          <div class="feat-name">Store</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:92%"></div></div>
-          <div class="feat-pct">92%</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-rank">2</div>
-          <div class="feat-name">CompetitionDistance</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:71%"></div></div>
-          <div class="feat-pct">71%</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-rank">3</div>
-          <div class="feat-name">DayOfWeek</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:65%"></div></div>
-          <div class="feat-pct">65%</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-rank">4</div>
-          <div class="feat-name">Promo</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:58%"></div></div>
-          <div class="feat-pct">58%</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-rank">5</div>
-          <div class="feat-name">Month</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:44%"></div></div>
-          <div class="feat-pct">44%</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-rank">6</div>
-          <div class="feat-name">StoreType</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:38%"></div></div>
-          <div class="feat-pct">38%</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-rank">7</div>
-          <div class="feat-name">Year / Day / Others</div>
-          <div class="feat-bar-wrap"><div class="feat-bar" style="--fw:22%"></div></div>
-          <div class="feat-pct">22%</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel" style="animation-delay:0.45s">
-      <div class="panel-header">
-        <span class="panel-title">Recent Evaluation History</span>
-        <span class="panel-badge">9 Runs</span>
-      </div>
-      <div class="history-list">
-        <div class="hist-item">
-          <div class="hist-file">processed_input_1.csv</div>
-          <div class="hist-rmspe warn">RMSPE 0.33</div>
-          <div class="hist-time">13:11 Mar 31</div>
-        </div>
-        <div class="hist-item">
-          <div class="hist-file">processed_input_2.csv</div>
-          <div class="hist-rmspe warn">RMSPE 0.31</div>
-          <div class="hist-time">13:12 Mar 31</div>
-        </div>
-        <div class="hist-item">
-          <div class="hist-file">processed_input_3.csv</div>
-          <div class="hist-rmspe warn">RMSPE 0.28</div>
-          <div class="hist-time">13:12 Mar 31</div>
-        </div>
-        <div class="hist-item">
-          <div class="hist-file">processed_input_4.csv</div>
-          <div class="hist-rmspe warn">RMSPE 0.27</div>
-          <div class="hist-time">13:12 Mar 31</div>
-        </div>
-        <div class="hist-item">
-          <div class="hist-file">processed_input_1.csv</div>
-          <div class="hist-rmspe warn">RMSPE 0.33</div>
-          <div class="hist-time">13:59 Mar 31</div>
-        </div>
-      </div>
-
-      <!-- Model info -->
-      <div style="margin-top:1.25rem">
-        <div class="panel-title" style="margin-bottom:0.75rem">Model Configuration</div>
-        <div class="model-info-grid">
-          <div class="info-item">
-            <div class="info-key">Algorithm</div>
-            <div class="info-val accent">XGBoost</div>
-          </div>
-          <div class="info-item">
-            <div class="info-key">Estimators</div>
-            <div class="info-val">500</div>
-          </div>
-          <div class="info-item">
-            <div class="info-key">Learning Rate</div>
-            <div class="info-val">0.05</div>
-          </div>
-          <div class="info-item">
-            <div class="info-key">Max Depth</div>
-            <div class="info-val">6</div>
-          </div>
-          <div class="info-item">
-            <div class="info-key">Target</div>
-            <div class="info-val">Sales</div>
-          </div>
-          <div class="info-item">
-            <div class="info-key">Subsample</div>
-            <div class="info-val">0.80</div>
-          </div>
+      
+      <div style="margin-top:2rem">
+        <div class="panel-title" style="margin-bottom:1rem">Recent Health Events</div>
+        <div class="history-list" id="history-container">
+          <!-- Live data injected here -->
         </div>
       </div>
     </div>
@@ -645,12 +189,13 @@
 </main>
 
 <footer>
-  <span>SALESWATCH v1.0 · DS201 Semester Project · Dr. Mehwish Fatima</span>
-  <span>XGBoost Sales Model · Rossmann Dataset · MLflow Logging</span>
+  <span>SALESWATCH v1.0 · Semester Project · Dr. Mehwish Fatima</span>
+  <span>Supabase Cloud Persistence · MLflow Observability</span>
 </footer>
 
 <script>
-  // Live clock
+  const API_BASE = window.location.origin;
+
   function tick() {
     const now = new Date();
     document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB');
@@ -659,11 +204,68 @@
   tick();
   setInterval(tick, 1000);
 
-  // Animate bars on load
+  async function updateDashboard() {
+    try {
+      const response = await fetch(`${API_BASE}/metrics-history?limit=20`);
+      const logs = await response.json();
+
+      if (logs && logs.length > 0) {
+        const avg_rmspe = logs.reduce((acc, log) => acc + log.rmspe, 0) / logs.length;
+        const avg_r2 = logs.reduce((acc, log) => acc + log.r2_score, 0) / logs.length;
+        
+        // Update KPIs
+        document.getElementById('model-type-display').textContent = logs[0].model_type;
+        document.querySelectorAll('.kpi-value')[1].innerHTML = `${avg_rmspe.toFixed(2)}<span class="kpi-unit">err</span>`;
+        document.querySelectorAll('.kpi-value')[2].innerHTML = `${avg_r2.toFixed(2)}`;
+        document.querySelectorAll('.kpi-value')[3].innerHTML = `${logs.length}<span class="kpi-unit">runs</span>`;
+
+        // Update Alert Badge
+        const badge = document.getElementById('alert-badge');
+        if(avg_rmspe > 0.35) {
+          badge.textContent = "UNHEALTHY";
+          badge.style.color = "var(--warn)";
+          badge.style.borderColor = "var(--warn)";
+        } else {
+          badge.textContent = "STABLE";
+          badge.style.color = "var(--accent)";
+          badge.style.borderColor = "var(--accent)";
+        }
+
+        // Update Table
+        const tbody = document.getElementById('metrics-tbody');
+        tbody.innerHTML = logs.slice(0, 8).map(log => `
+          <tr>
+            <td class="metric-name">${log.dataset_source.split(/[\\/]/).pop()}</td>
+            <td class="${log.rmspe > 0.35 ? 'metric-warn' : 'metric-good'}">${log.rmspe.toFixed(4)}</td>
+            <td>${log.mae.toFixed(0)}</td>
+            <td>${log.rmse.toFixed(0)}</td>
+            <td>${(log.mape * 100).toFixed(1)}%</td>
+            <td class="${log.r2_score > 0.7 ? 'metric-good' : 'metric-warn'}">${log.r2_score.toFixed(3)}</td>
+          </tr>
+        `).join('');
+
+        // Update History Sidebar
+        const historyList = document.getElementById('history-container');
+        historyList.innerHTML = logs.slice(0, 5).map(log => `
+          <div class="hist-item">
+            <div class="hist-file">${log.dataset_source.split(/[\\/]/).pop()}</div>
+            <div class="hist-rmspe ${log.rmspe > 0.35 ? 'warn' : 'good'}">${log.rmspe.toFixed(2)}</div>
+            <div class="hist-time">${new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+          </div>
+        `).join('');
+
+        // Update Gauge (Threshold is 0.35, so 0.35 = 50% width)
+        const gaugeWidth = Math.min((avg_rmspe / 0.4) * 100, 100);
+        document.getElementById('gaugeFill').style.width = `${gaugeWidth}%`;
+      }
+    } catch (error) {
+      console.error("Dashboard fetch failed:", error);
+    }
+  }
+
   window.addEventListener('load', () => {
-    setTimeout(() => {
-      document.querySelectorAll('.bar-fill').forEach(el => el.classList.add('animate'));
-    }, 300);
+    updateDashboard();
+    setInterval(updateDashboard, 5000); // Fast refresh for demo
   });
 </script>
 </body>

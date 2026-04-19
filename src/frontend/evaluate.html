@@ -402,8 +402,31 @@
     </div>
   </div>
 
-  <!-- ── TAB 3: History ── -->
+   <!-- ── TAB 3: History ── -->
   <div class="tab-pane" id="tab-history">
+    
+    <!-- ── Feedback Panel (The Hub) ── -->
+    <div class="panel" style="margin-bottom: 1.5rem; border-color: var(--accent);">
+      <div class="panel-header">
+        <span class="panel-title" style="color: var(--accent);">Ground Truth Verification Hub</span>
+        <span class="panel-badge">Feedback Loop</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: flex-end;">
+        <div class="form-group">
+          <label class="form-label" style="font-family: var(--mono); font-size: 0.62rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.4rem; display: block;">Prediction ID</label>
+          <input type="number" id="feedbackId" placeholder="e.g. 101" style="width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 0.55rem; outline: none;" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-family: var(--mono); font-size: 0.62rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.4rem; display: block;">Actual Sales (€)</label>
+          <input type="number" id="actualSales" placeholder="Enter real value" style="width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 0.55rem; outline: none;" />
+        </div>
+        <button class="btn-primary" onclick="submitFeedback()" style="height: 38px; background: var(--accent); color: #000; border: none; border-radius: 4px; padding: 0 1.5rem; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; cursor: pointer;">
+          Submit
+        </button>
+      </div>
+    </div>
+
+    <!-- ── The Table Panel ── -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Metrics Evaluation History</span>
@@ -447,6 +470,8 @@
         <span>Click Refresh to load history from API</span>
       </div>
     </div>
+  </div>
+  </div>
   </div>
 </main>
 
@@ -740,6 +765,36 @@
     } else {
       document.getElementById('compareBtn').disabled = on;
       document.getElementById('compareSpinner').style.display = on ? 'block' : 'none';
+    }
+  }
+
+  async function submitFeedback() {
+  const predId = document.getElementById('feedbackId').value;
+  const actual = document.getElementById('actualSales').value;
+
+    if (!predId || !actual) {
+      showToast('Please enter both ID and Sales value', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/feedback?prediction_id=${predId}&actual_sales=${actual}`, {
+        method: 'POST'
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast(`Success: Health updated for ID ${predId}`);
+        document.getElementById('feedbackId').value = '';
+        document.getElementById('actualSales').value = '';
+        // Refresh history to see the update
+        loadHistory();
+      } else {
+        showToast(data.detail || 'Feedback failed', 'error');
+      }
+    } catch (e) {
+      showToast('Failed to connect to API feedback endpoint', 'error');
     }
   }
 </script>
