@@ -8,7 +8,7 @@ joblib
 pathlib
 os
 sys
-pyYAML
+pyyaml
 pytest
 scipy
 fastapi

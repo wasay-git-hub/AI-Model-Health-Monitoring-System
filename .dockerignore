@@ -1,0 +1,37 @@
+# Python stuff
+venv/
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Large Raw Data
+data/train.csv
+data/store.csv
+data/train_80.csv
+*.zip
+*.7z
+
+# MLflow local tracking
+mlruns/
+mlartifacts/
+mlflow.db
+
+# Notebooks
+notebooks/
+
+# Git & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+README.md
+LICENSE
+
+# Docker files themselves
+Dockerfile
+docker-compose.yml
+.dockerignore
