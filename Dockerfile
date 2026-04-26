@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Install all libraries
-RUN pip install --no-cache-dir -r requirements.txt
+# We increase the timeout to 1000 seconds for slow connections
+RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Copy the entire project code into the container
 COPY . .

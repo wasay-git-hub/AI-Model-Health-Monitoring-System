@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import mlflow
 import time
+import os
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -36,8 +37,9 @@ async def lifespan(app: FastAPI):
     config = load_params()
     loaded_model, model_type, model_path = load_model_once(config)
 
-    mlflow.set_tracking_uri("file:./mlruns")
-    mlflow.set_experiment("Sales_Monitoring")
+    # This tells MLflow: "If there is no network server, just save to this local folder"
+    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns")
+    mlflow.set_tracking_uri(tracking_uri)
 
     app.state.config = config
     app.state.model = loaded_model

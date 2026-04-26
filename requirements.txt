@@ -5,15 +5,13 @@ seaborn
 scikit-learn
 xgboost
 joblib
-pathlib
-os
-sys
 pyyaml
 pytest
 scipy
 fastapi
 uvicorn
 python-multipart
+aiofiles
 mlflow
 sqlalchemy
 psycopg2-binary
