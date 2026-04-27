@@ -29,17 +29,34 @@ def _valid_predict_payload():
     }
 
 def _make_small_eval_files(tmp_path):
-    src_1 = BASE_DIR / "data" / "input_1.csv"
-    src_2 = BASE_DIR / "data" / "input_2.csv"
+    data = {
+        'Store': range(1, 251),
+        'DayOfWeek': [1] * 250,
+        'Date': pd.date_range(start='2023-01-01', periods=250).astype(str),
+        'Sales': [5000] * 250,
+        'Customers': [100] * 250,
+        'Open': [1] * 250,
+        'Promo': [1] * 250,
+        'StateHoliday': ['0'] * 250,
+        'SchoolHoliday': [0] * 250,
+        'StoreType': ['a'] * 250,
+        'Assortment': ['a'] * 250,
+        'CompetitionDistance': [500.0] * 250,
+        'CompetitionOpenSinceMonth': [1] * 250,
+        'CompetitionOpenSinceYear': [2010] * 250,
+        'Promo2': [0] * 250,
+        'Promo2SinceWeek': [0] * 250,
+        'Promo2SinceYear': [0] * 250,
+        'PromoInterval': ['None'] * 250,
+    }
 
-    df_1 = pd.read_csv(src_1).head(250)
-    df_2 = pd.read_csv(src_2).head(250)
+    df = pd.DataFrame(data)
 
     file_1 = tmp_path / "small_input_1.csv"
     file_2 = tmp_path / "small_input_2.csv"
 
-    df_1.to_csv(file_1, index=False)
-    df_2.to_csv(file_2, index=False)
+    df.to_csv(file_1, index=False)
+    df.to_csv(file_2, index=False)
 
     return file_1, file_2
 
