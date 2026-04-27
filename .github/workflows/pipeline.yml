@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -25,3 +25,13 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           docker run -e DATABASE_URL=${{ secrets.DATABASE_URL }} health-monitoring-app pytest tests/test_api_endpoints.py -v
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
