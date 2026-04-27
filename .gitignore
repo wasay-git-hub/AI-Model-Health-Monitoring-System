@@ -12,8 +12,8 @@ data/*.csv
 data/*.zip
 
 # Ignore Trained Models (Too big for GitHub)
-models/*.pkl
-models/*.joblib
+# models/*.pkl
+# models/*.joblib
 
 # Ignore IDE settings
 .vscode/
