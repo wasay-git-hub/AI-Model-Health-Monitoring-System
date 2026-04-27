@@ -1,24 +1,19 @@
 FROM python:3.12-slim
 
-# Set the working directory
 WORKDIR /app
 
-# Install system dependencies for PostgreSQL and building packages
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to speed up future builds
 COPY requirements.txt .
 
-# Install all libraries
-# We increase the timeout to 1000 seconds for slow connections
 RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
-# Copy the entire project code into the container
 COPY . .
 
-# Expose ports; FastAPI: 8000, MLflow: 5000
 EXPOSE 8000
 EXPOSE 5000
+
+CMD ["uvicorn", "src.fast_api.api_app:app", "--host", "0.0.0.0", "--port", "8000"]
