@@ -394,17 +394,6 @@
         <div class="form-section-label">Store Characteristics</div>
 
         <div class="form-group">
-          <label class="form-label" for="storetype">Store Type <span class="required">*</span></label>
-          <select id="storetype">
-            <option value="1" selected>1 — Type a</option>
-            <option value="2">2 — Type b</option>
-            <option value="3">3 — Type c</option>
-            <option value="4">4 — Type d</option>
-          </select>
-          <span class="form-hint">1–4 · Mapped store type</span>
-        </div>
-
-        <div class="form-group">
           <label class="form-label" for="assortment">Assortment <span class="required">*</span></label>
           <select id="assortment">
             <option value="1" selected>1 — Basic (a)</option>
@@ -515,7 +504,7 @@
       Promo: parseInt(document.getElementById('promo').value),
       StateHoliday: parseInt(document.getElementById('stateholiday').value),
       SchoolHoliday: parseInt(document.getElementById('schoolholiday').value),
-      StoreType: parseInt(document.getElementById('storetype').value),
+      StoreType: 1, // hardcoded default
       Assortment: parseInt(document.getElementById('assortment').value),
       CompetitionDistance: parseFloat(document.getElementById('compdist').value),
       Year: parseInt(document.getElementById('year').value),

@@ -454,12 +454,12 @@
         <table class="history-table">
           <thead>
             <tr>
-              <th>Run ID</th>
-              <th>Timestamp</th>
-              <th>Endpoint</th>
+              <th>ID</th>
+              <th>Time</th>
               <th>Model</th>
-              <th>Files</th>
-              <th>Metrics</th>
+              <th>Prediction</th>
+              <th>Actual Sales</th>
+              <th>Health (Error %)</th>
             </tr>
           </thead>
           <tbody id="historyTableBody"></tbody>
@@ -599,21 +599,34 @@
   }
 
   async function runCompare() {
+    // Fix: Ensure we are pulling the right values from the input fields
     const inputs = [...document.querySelectorAll('.compare-file-input')].map(i => i.value.trim()).filter(Boolean);
-    if (inputs.length < 2) { showToast('Need at least 2 files', 'error'); return; }
+    
+    if (inputs.length < 2) { 
+      showToast('Please enter at least 2 file paths', 'error'); 
+      return; 
+    }
 
     setLoading('compare', true);
     try {
       const res = await fetch(`${API_BASE}/compare-input-files`, {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ input_files: inputs }),
+        method: 'POST', 
+        headers: {'Content-Type':'application/json'},
+        // Ensure the payload matches the CompareInputFilesRequest schema exactly
+        body: JSON.stringify({ input_files: inputs }), 
       });
+
+      if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.details || 'Comparison failed');
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
       renderCompareResults(data);
-      showToast('Comparison complete');
+      showToast('Comparison successful');
     } catch(e) {
-      showToast('API offline — load demo data', 'error');
+      console.error(e);
+      showToast(e.message, 'error');
     } finally {
       setLoading('compare', false);
     }
@@ -688,73 +701,53 @@
   }
 
   // ── History ──
-  async function loadHistory() {
-    const limit = document.getElementById('filterLimit').value;
-    document.getElementById('historyEmpty').style.display = 'none';
-    try {
-      const res = await fetch(`${API_BASE}/metrics-history?limit=${limit}`);
-      const data = await res.json();
-      historyData = data;
-      renderHistory(data);
-      showToast(`Loaded ${data.length} history records`);
-    } catch(e) {
-      // Load from embedded JSONL data
-      historyData = getDemoHistory();
-      renderHistory(historyData);
-      showToast('Demo history loaded (API offline)', 'error');
+async function loadHistory() {
+  const limit = document.getElementById('filterLimit').value;
+  document.getElementById('historyEmpty').style.display = 'none';
+  try {
+    // We now fetch from /inference-history
+    const res = await fetch(`${API_BASE}/inference-history?limit=${limit}`);
+    const data = await res.json();
+    historyData = data;
+    renderHistory(data);
+    showToast(`Loaded ${data.length} inference records`);
+  } catch(e) {
+    showToast('API connection error', 'error');
+  }
+}
+
+function renderHistory(data) {
+  const tbody = document.getElementById('historyTableBody');
+  const empty = document.getElementById('historyEmpty');
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(r => {
+    const dt = new Date(r.timestamp);
+    let errorDisplay = '<span style="color:var(--muted)">Pending...</span>';
+    
+    // Calculate Error if Feedback (Actual Sales) is present
+    if (r.actual_sales !== null && r.actual_sales !== 0) {
+      const errorPct = (Math.abs(r.actual_sales - r.prediction_value) / r.actual_sales) * 100;
+      const color = errorPct > 35 ? 'var(--danger)' : 'var(--accent)';
+      errorDisplay = `<span style="color:${color}; font-weight:bold;">${errorPct.toFixed(2)}%</span>`;
     }
-  }
 
-  function getDemoHistory() {
-    return [
-      { run_id:'effc5deb-bd1e-42b0-a550-d02760e22798', timestamp:'2026-03-31T13:11:19.500529', endpoint:'evaluate-file', model_type:'XGBoost', input_files:['data/processed_input_1.csv'], metrics:{'data/processed_input_1.csv':{RMSPE:0.33,MAE:1281.2491,RMSE:1963.0337,MAPE:0.1924,R2:0.5323}}, notes:null },
-      { run_id:'bdc3bb47-cc1b-45ca-b2b7-b0549ddd9b29', timestamp:'2026-03-31T13:12:02.979434', endpoint:'evaluate-file', model_type:'XGBoost', input_files:['data/processed_input_2.csv'], metrics:{'data/processed_input_2.csv':{RMSPE:0.31,MAE:1447.5095,RMSE:2192.1021,MAPE:0.2008,R2:0.5381}}, notes:null },
-      { run_id:'14a39d68-8c62-482b-8d3c-ffa5192b5e01', timestamp:'2026-03-31T13:12:10.879546', endpoint:'evaluate-file', model_type:'XGBoost', input_files:['data/processed_input_3.csv'], metrics:{'data/processed_input_3.csv':{RMSPE:0.28,MAE:1450.5796,RMSE:2189.3513,MAPE:0.1908,R2:0.4998}}, notes:null },
-      { run_id:'0786a70f-c7c3-4487-bfe1-3dcfd7b513f7', timestamp:'2026-03-31T13:12:16.625984', endpoint:'evaluate-file', model_type:'XGBoost', input_files:['data/processed_input_4.csv'], metrics:{'data/processed_input_4.csv':{RMSPE:0.27,MAE:1314.6772,RMSE:1973.7723,MAPE:0.1893,R2:0.5762}}, notes:null },
-      { run_id:'a42446f3-23d9-4ac3-b0d9-d81f5130605f', timestamp:'2026-03-31T13:59:27.350108', endpoint:'evaluate-file', model_type:'XGBoost', input_files:['data/processed_input_1.csv'], metrics:{'data/processed_input_1.csv':{RMSPE:0.33,MAE:1281.2491,RMSE:1963.0337,MAPE:0.1924,R2:0.5323}}, notes:null },
-    ];
-  }
-
-  function filterHistory() { renderHistory(historyData); }
-
-  function renderHistory(data) {
-    const epFilter = document.getElementById('filterEndpoint').value;
-    const limit = parseInt(document.getElementById('filterLimit').value);
-    let filtered = data;
-    if (epFilter) filtered = data.filter(r => r.endpoint === epFilter);
-    filtered = filtered.slice(-limit);
-
-    const tbody = document.getElementById('historyTableBody');
-    const empty = document.getElementById('historyEmpty');
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = '';
-      empty.style.display = 'flex';
-      return;
-    }
-    empty.style.display = 'none';
-
-    tbody.innerHTML = [...filtered].reverse().map(r => {
-      const dt = new Date(r.timestamp);
-      const epClass = r.endpoint === 'evaluate-file' ? 'ep-eval' : 'ep-compare';
-      const files = r.input_files.map(f => f.split(/[\\/]/).pop()).join(', ');
-
-      // Build metrics summary
-      const metricLines = Object.entries(r.metrics).map(([file, m]) => {
-        const fname = file.split(/[\\/]/).pop();
-        return `<div class="metrics-line" style="color:var(--muted)">${fname}: RMSPE <span style="color:${m.RMSPE>0.2?'var(--warn)':'var(--accent)'}">${m.RMSPE.toFixed(2)}</span> R² ${m.R2.toFixed(3)}</div>`;
-      }).join('');
-
-      return `<tr>
-        <td class="run-id">${r.run_id.slice(0,8)}…</td>
-        <td>${dt.toLocaleDateString()} ${dt.toLocaleTimeString()}</td>
-        <td><span class="ep-badge ${epClass}">${r.endpoint}</span></td>
-        <td style="color:var(--accent3)">${r.model_type}</td>
-        <td style="font-size:0.62rem;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${files}">${files}</td>
-        <td><div class="metrics-cell">${metricLines}</div></td>
-      </tr>`;
-    }).join('');
-  }
+    return `<tr>
+      <td class="run-id" style="color:var(--accent2)">#${r.inference_id}</td>
+      <td>${dt.toLocaleTimeString()}</td>
+      <td style="color:var(--accent3)">${r.model_type}</td>
+      <td>€${r.prediction_value.toFixed(0)}</td>
+      <td>${r.actual_sales ? '€' + r.actual_sales : '---'}</td>
+      <td>${errorDisplay}</td>
+    </tr>`;
+  }).join('');
+}
 
   // ── Loading state ──
   function setLoading(which, on) {

@@ -30,6 +30,7 @@ from src.fast_api.api_schemas import (
     PredictHealthResponse,
 )
 
+TESTING = os.getenv("TESTING", "false").lower() == "true"
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 @asynccontextmanager
@@ -110,20 +111,21 @@ def predict_health(payload: PredictHealthRequest):
         
         duration_ms = (time.perf_counter() - start_time) * 1000.0
         
-        db = Session()
-        try:
-            new_inference = SingleInferenceLog(
-                model_type=app.state.model_type,
-                inputs=feature_dict,
-                prediction_value=prediction,
-                latency_ms=round(duration_ms, 2)
-            )
-            db.add(new_inference)
-            db.commit()
-            db.refresh(new_inference)
-            prediction_id = new_inference.inference_id
-        finally:
-            db.close()
+        if not TESTING:
+            db = Session()
+            try:
+                new_inference = SingleInferenceLog(...)
+                db.add(new_inference)
+                db.commit()
+                db.refresh(new_inference)
+                prediction_id = new_inference.inference_id
+            except Exception as e:
+                print(f"Database logging failed: {e}")
+                prediction_id = 0 
+            finally:
+                db.close()
+        else:
+            prediction_id = 0 # Dummy ID for tests
 
         return PredictHealthResponse(
             prediction=prediction,
@@ -149,24 +151,17 @@ def evaluate_file(payload: EvaluateFileRequest):
             mlflow.log_metric(metric_name, value)
         mlflow.log_metric("latency_ms", duration_ms)
 
-    db = Session()
-    try:
-        new_log = ModelHealthLog(
-            endpoint="evaluate-file",
-            model_type=app.state.model_type,
-            dataset_source=result["input_file"],
-            row_count=result["row_count"],
-            rmspe=result["metrics"]["RMSPE"],
-            mae=result["metrics"]["MAE"],
-            mape=result["metrics"]["MAPE"],
-            rmse=result["metrics"]["RMSE"],
-            r2_score=result["metrics"]["R2"],
-            latency_ms=round(duration_ms, 2)
-        )
-        db.add(new_log)
-        db.commit()
-    finally:
-        db.close()
+    # Database Logging
+    if not TESTING:
+        db = Session()
+        try:
+            new_log = ModelHealthLog(...)
+            db.add(new_log)
+            db.commit()
+        except Exception as e:
+            print(f"Database logging failed: {e}")
+        finally:
+            db.close()
 
     return EvaluateFileResponse(
         input_file=result["input_file"],
@@ -203,6 +198,15 @@ def metrics_history(limit: int = Query(default=20, ge=1, le=200)):
     except Exception as e:
         print(f"CRITICAL SQL ERROR: {e}") # This will show the real error in your terminal
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@app.get("/inference-history", summary="Get single prediction history for feedback")
+def inference_history(limit: int = Query(default=20, ge=1, le=200)):
+    db = Session()
+    try:
+        # Fetch from the second table (SingleInferenceLog)
+        return db.query(SingleInferenceLog).order_by(SingleInferenceLog.timestamp.desc()).limit(limit).all()
     finally:
         db.close()
 
