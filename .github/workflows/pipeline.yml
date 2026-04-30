@@ -25,7 +25,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           TESTING: "true"
         run: |
-          docker run -e DATABASE_URL=${{ secrets.DATABASE_URL }} -e TESTING=true health-monitoring-app
+          docker run -e DATABASE_URL=${{ secrets.DATABASE_URL }} -e TESTING=true health-monitoring-app pytest tests/test_api_endpoints.py -v
 
   deploy:
     needs: build-and-test
