@@ -10,10 +10,12 @@ __pycache__/
 # Ignore Datasets (Too big for GitHub)
 data/*.csv
 data/*.zip
+
 !data/processed_input_1.csv
 !data/processed_input_2.csv
 !data/processed_input_3.csv
 !data/processed_input_4.csv
+!data/store.csv
 
 # Ignore Trained Models (Too big for GitHub)
 # models/*.pkl
