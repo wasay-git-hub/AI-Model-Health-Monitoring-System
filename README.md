@@ -4,6 +4,7 @@
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688)
 ![XGBoost](https://img.shields.io/badge/Model-XGBoost-orange)
 ![Supabase](https://img.shields.io/badge/Cloud-Supabase-3ecf8e)
+![MLflow](https://img.shields.io/badge/Experiment_Tracker-MLflow-blue)
 ![Docker](https://img.shields.io/badge/Container-Docker-2496ed)
 ![CI/CD](https://img.shields.io/badge/Pipeline-GitHub--Actions-blue)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-success)
