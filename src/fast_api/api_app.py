@@ -227,6 +227,62 @@ def inference_history(limit: int = Query(default=20, ge=1, le=200)):
     finally:
         db.close()
 
+@app.post(
+    "/compare-input-files",
+    response_model=CompareInputFilesResponse,
+    summary="Compare metrics across multiple input CSV files",
+)
+def compare_files(payload: CompareInputFilesRequest):
+    """Evaluate multiple files and log each result to Supabase for comparison visualization."""
+    try:
+        compared = compare_input_files(payload.input_files, app.state.config, app.state.model)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+    # Database Logging for each file in the comparison
+    if not TESTING:
+        db = Session()
+        try:
+            for item in compared["results"]:
+                new_log = ModelHealthLog(
+                    endpoint="compare-input-files",
+                    model_type=app.state.model_type,
+                    dataset_source=item["input_file"],
+                    row_count=item["row_count"],
+                    rmspe=item["metrics"]["RMSPE"],
+                    mae=item["metrics"]["MAE"],
+                    mape=item["metrics"]["MAPE"],
+                    rmse=item["metrics"]["RMSE"],
+                    r2_score=item["metrics"]["R2"],
+                    latency_ms=0.0 # Aggregated latency not measured per file here
+                )
+                db.add(new_log)
+            db.commit()
+            print(f"Comparison logged to Supabase for {len(compared['results'])} files.")
+        except Exception as e:
+            print(f"Database logging failed during comparison: {e}")
+        finally:
+            db.close()
+
+    return CompareInputFilesResponse(
+        model_type=app.state.model_type,
+        total_files=len(compared["results"]),
+        results=[
+            FileComparisonResult(
+                input_file=item["input_file"],
+                row_count=item["row_count"],
+                metrics=FileMetrics(**item["metrics"]),
+            )
+            for item in compared["results"]
+        ],
+        rankings=[MetricRanking(**ranking) for ranking in compared["rankings"]],
+        timestamp=datetime.now(timezone.utc),
+    )
+
 # --- EXCEPTION HANDLERS ---
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):

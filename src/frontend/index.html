@@ -169,13 +169,18 @@
 
     <div class="panel">
       <div class="panel-header"><span class="panel-title">Health Status</span></div>
-      <div class="threshold-gauge">
-        <div class="gauge-title">RMSPE vs Threshold (0.35)</div>
-        <div class="gauge-track">
-          <div class="gauge-fill" id="gaugeFill"></div>
-          <div class="gauge-threshold"></div>
-        </div>
-        <div class="gauge-labels"><span>0.00</span><span>0.35</span><span>0.7+</span></div>
+<div class="threshold-gauge">
+  <div class="gauge-title">RMSPE vs Threshold (0.35)</div>
+  <div class="gauge-track">
+    <div class="gauge-fill" id="gaugeFill"></div>
+    <div class="gauge-threshold" style="left: 35%;"></div> 
+  </div>
+  <div class="gauge-labels">
+    <span>0.00</span>
+    <span>0.50</span>
+    <span>1.00</span>
+  </div>
+</div>
       </div>
       
       <div style="margin-top:2rem">
@@ -253,8 +258,8 @@
           </div>
         `).join('');
 
-        // Update Gauge (Threshold is 0.35, so 0.35 = 50% width)
-        const gaugeWidth = Math.min((avg_rmspe / 0.4) * 100, 100);
+        // Calculate gauge width based on a 0.0 to 1.0 range
+        const gaugeWidth = Math.min(avg_rmspe * 100, 100); 
         document.getElementById('gaugeFill').style.width = `${gaugeWidth}%`;
       }
     } catch (error) {
