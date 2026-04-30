@@ -139,7 +139,3 @@ pytest tests/
 ```
 
 ---
-
-## License
-
-Academic Semester Project for **DS201 — Programming for AI**.
