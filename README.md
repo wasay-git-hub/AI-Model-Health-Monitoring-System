@@ -111,9 +111,7 @@ AI-Model-Health-Monitoring-System/
 
 ### 1. Prerequisites
 
-Due to GitHub file size limits, the trained model and data batches must be placed manually:
-
-- Ensure `models/XGBoost.pkl` and `data/processed_input_*.csv` exist.
+- Ensure `models/XGBoost.pkl` and `data/processed_input_*.csv` exist. You can also train your own model by setting configuration from `src/params.yaml` and running `src/model_pipeline/main.py`.
 - Create a `.env` file with your `DATABASE_URL`.
 
 ### 2. Running via Docker (Recommended)
