@@ -111,10 +111,16 @@ def predict_health(payload: PredictHealthRequest):
         
         duration_ms = (time.perf_counter() - start_time) * 1000.0
         
+        # Database logging
         if not TESTING:
             db = Session()
             try:
-                new_inference = SingleInferenceLog(...)
+                new_inference = SingleInferenceLog(
+                    model_type=app.state.model_type,
+                    inputs=feature_dict,
+                    prediction_value=prediction,
+                    latency_ms=round(duration_ms, 2)
+                )
                 db.add(new_inference)
                 db.commit()
                 db.refresh(new_inference)
@@ -125,7 +131,7 @@ def predict_health(payload: PredictHealthRequest):
             finally:
                 db.close()
         else:
-            prediction_id = 0 # Dummy ID for tests
+            prediction_id = 0
 
         return PredictHealthResponse(
             prediction=prediction,
@@ -151,11 +157,22 @@ def evaluate_file(payload: EvaluateFileRequest):
             mlflow.log_metric(metric_name, value)
         mlflow.log_metric("latency_ms", duration_ms)
 
-    # Database Logging
+    # Database logging
     if not TESTING:
         db = Session()
         try:
-            new_log = ModelHealthLog(...)
+            new_log = ModelHealthLog(
+                endpoint="evaluate-file",
+                model_type=app.state.model_type,
+                dataset_source=result["input_file"],
+                row_count=result["row_count"],
+                rmspe=result["metrics"]["RMSPE"],
+                mae=result["metrics"]["MAE"],
+                mape=result["metrics"]["MAPE"],
+                rmse=result["metrics"]["RMSE"],
+                r2_score=result["metrics"]["R2"],
+                latency_ms=round(duration_ms, 2)
+            )
             db.add(new_log)
             db.commit()
         except Exception as e:
