@@ -4,6 +4,7 @@
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688)
 ![XGBoost](https://img.shields.io/badge/Model-XGBoost-orange)
 ![Supabase](https://img.shields.io/badge/Cloud-Supabase-3ecf8e)
+![MLflow](https://img.shields.io/badge/Experiment_Tracker-MLflow-blue)
 ![Docker](https://img.shields.io/badge/Container-Docker-2496ed)
 ![CI/CD](https://img.shields.io/badge/Pipeline-GitHub--Actions-blue)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-success)
@@ -111,9 +112,7 @@ AI-Model-Health-Monitoring-System/
 
 ### 1. Prerequisites
 
-Due to GitHub file size limits, the trained model and data batches must be placed manually:
-
-- Ensure `models/XGBoost.pkl` and `data/processed_input_*.csv` exist.
+- Ensure `models/XGBoost.pkl` and `data/processed_input_*.csv` exist. You can also train your own model by setting configuration from `src/params.yaml` and running `src/model_pipeline/main.py`.
 - Create a `.env` file with your `DATABASE_URL`.
 
 ### 2. Running via Docker (Recommended)
@@ -139,7 +138,3 @@ pytest tests/
 ```
 
 ---
-
-## License
-
-Academic Semester Project for **DS201 — Programming for AI**.
